@@ -29,8 +29,9 @@ module.exports = async (req, res) => {
         oauth2Client.setCredentials({ access_token: accessToken });
 
         try {
-            // 🔹 Obtém informações do usuário autenticado
-            const { data } = await oauth2Client.userinfo.get();
+            // 🔹 Obtém informações do usuário autenticado (Forma correta)
+            const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+            const { data } = await oauth2.userinfo.get();
 
             console.log("✅ [USER] Dados do usuário obtidos:", data);
 
@@ -41,7 +42,7 @@ module.exports = async (req, res) => {
             });
 
         } catch (error) {
-            console.error("❌ [USER] Token inválido ou expirado: Token recuperado: " + accessToken, error.message, );
+            console.error("❌ [USER] Token inválido ou expirado: " + accessToken, error.message);
 
             // 🔹 Tenta renovar o token se houver um refresh_token disponível
             if (error.message.includes("invalid_grant") || error.message.includes("credentials")) {
@@ -69,10 +70,10 @@ module.exports = async (req, res) => {
                 }
             }
 
-            return res.status(401).json({ error: "Token inválido ou expirado. Faça login novamente. Token recuperado: " + accessToken });
+            return res.status(401).json({ error: "Token inválido ou expirado. Faça login novamente." });
         }
     } catch (error) {
         console.error("❌ [USER] Erro ao buscar informações do usuário:", error.message);
-        res.status(500).json({ error: "Erro ao buscar informações do usuário.Token recuperado: " + accessToken, details: error.message });
+        res.status(500).json({ error: "Erro ao buscar informações do usuário.", details: error.message });
     }
 };
