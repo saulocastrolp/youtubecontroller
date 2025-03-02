@@ -78,6 +78,8 @@
 
         async function getUserInfo() {
             const accessToken = localStorage.getItem("access_token");
+            console.log("🔍 Enviando token para a API:", accessToken);
+
 
             if (!accessToken) {
                 console.warn("⚠️ Nenhum token armazenado. Usuário não autenticado.");
