@@ -30,9 +30,7 @@ module.exports = async (req, res) => {
 
         try {
             // 🔹 Obtém informações do usuário autenticado
-            const oauth2 = google.OAuth2();
-            oauth2.setCredentials({ access_token: accessToken });
-            const { data } = await oauth2.userinfo.get();
+            const { data } = await oauth2Client.userinfo.get();
 
             console.log("✅ [USER] Dados do usuário obtidos:", data);
 
