@@ -11,7 +11,6 @@ module.exports = async (req, res) => {
 
         // 🔹 Obtém o token do cabeçalho Authorization
         const accessToken = req.headers.authorization?.split(" ")[1];
-        console.log("🔍 [TOKEN RECUPERADO] O token recuperado foi: " + accessToken);
 
         if (!accessToken) {
             console.warn("⚠️ [USER] Token de acesso não fornecido.");
@@ -19,6 +18,15 @@ module.exports = async (req, res) => {
         }
 
         console.log(`✅ [USER] Token recebido: ${accessToken.substring(0, 6)}... (mascarado para segurança)`);
+
+        // 🔥 Testa se o token é válido antes de usá-lo
+        const tokenInfo = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${accessToken}`)
+            .then(response => response.json());
+
+        if (tokenInfo.error || tokenInfo.expires_in <= 0) {
+            console.error("❌ [USER] Token inválido ou expirado:", tokenInfo);
+            return res.status(401).json({ error: "Token inválido ou expirado. Faça login novamente." });
+        }
 
         const oauth2Client = new google.auth.OAuth2(
             process.env.CLIENT_ID,
@@ -29,7 +37,7 @@ module.exports = async (req, res) => {
         oauth2Client.setCredentials({ access_token: accessToken });
 
         try {
-            // 🔹 Obtém informações do usuário autenticado (Forma correta)
+            // 🔹 Obtém informações do usuário autenticado
             const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
             const { data } = await oauth2.userinfo.get();
 
@@ -42,38 +50,11 @@ module.exports = async (req, res) => {
             });
 
         } catch (error) {
-            console.error("❌ [USER] Token inválido ou expirado: " + accessToken, error.message);
-
-            // 🔹 Tenta renovar o token se houver um refresh_token disponível
-            if (error.message.includes("invalid_grant") || error.message.includes("credentials")) {
-                console.log("🔄 Tentando renovar o token de acesso...");
-
-                try {
-                    const { tokens } = await oauth2Client.refreshAccessToken();
-                    oauth2Client.setCredentials(tokens);
-
-                    console.log("✅ Token renovado com sucesso!");
-
-                    // Obtém os dados do usuário novamente com o novo token
-                    const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
-                    const { data } = await oauth2.userinfo.get();
-
-                    return res.json({
-                        name: data.name,
-                        email: data.email,
-                        picture: data.picture,
-                        new_access_token: tokens.access_token, // Envia novo token para o front-end
-                    });
-                } catch (refreshError) {
-                    console.error("❌ Erro ao renovar o token:", refreshError.message);
-                    return res.status(401).json({ error: "Token expirado. Faça login novamente." });
-                }
-            }
-
-            return res.status(401).json({ error: "Token inválido ou expirado. Faça login novamente." });
+            console.error("❌ [USER] Erro ao obter informações do usuário:", error);
+            return res.status(500).json({ error: "Erro ao buscar informações do usuário.", details: error.message });
         }
     } catch (error) {
-        console.error("❌ [USER] Erro ao buscar informações do usuário:", error.message);
-        res.status(500).json({ error: "Erro ao buscar informações do usuário.", details: error.message });
+        console.error("❌ [USER] Erro ao processar requisição:", error.message);
+        res.status(500).json({ error: "Erro ao processar requisição.", details: error.message });
     }
 };

@@ -23,6 +23,15 @@ module.exports = async (req, res) => {
 
         console.log("✅ [OAUTH CALLBACK] Tokens obtidos:", tokens);
 
+        // 🔥 Verifica se o token tem os escopos corretos antes de redirecionar
+        const tokenInfo = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${tokens.access_token}`)
+            .then(response => response.json());
+
+        if (!tokenInfo.scope.includes("https://www.googleapis.com/auth/userinfo.profile")) {
+            console.error("❌ O escopo do token é inválido. Revogando acesso...");
+            return res.status(403).json({ error: "Escopo inválido. Revogue o acesso e tente novamente." });
+        }
+
         // Redireciona para a página inicial com o token na URL
         res.redirect(`/?access_token=${tokens.access_token}`);
     } catch (error) {
