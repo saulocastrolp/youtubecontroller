@@ -11,12 +11,26 @@ module.exports = async (req, res) => {
             return res.status(401).json({ error: "Token de acesso ausente." });
         }
 
+        if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.REDIRECT_URI) {
+            console.error("❌ ERRO: Variáveis de ambiente não definidas!");
+            return res.status(500).json({ error: "Variáveis de ambiente não configuradas." });
+        }
+
+        // 🔥 Criando o OAuth2 Client corretamente
+        const oauth2Client = new google.auth.OAuth2(
+            process.env.CLIENT_ID,
+            process.env.CLIENT_SECRET,
+            process.env.REDIRECT_URI
+        );
+
+        oauth2Client.setCredentials({ access_token: accessToken });
+
         const youtube = google.youtube({
             version: "v3",
-            auth: accessToken
+            auth: oauth2Client // 🔥 Agora usando OAuth2Client corretamente
         });
 
-        // 🔥 Simulando Play/Pause (Atualmente o YouTube não tem um endpoint direto para play)
+        // 🔥 Simulando um comando de reprodução, já que a API do YouTube não tem um endpoint direto para Play/Pause
         const response = await youtube.videos.list({
             part: "snippet",
             myRating: "like"
