@@ -74,6 +74,6 @@ module.exports = async (req, res) => {
         }
     } catch (error) {
         console.error("❌ [USER] Erro ao buscar informações do usuário:", error.message);
-        res.status(500).json({ error: "Erro ao buscar informações do usuário.", details: error.message });
+        res.status(500).json({ error: "Erro ao buscar informações do usuário.Token recuperado: " + accessToken, details: error.message });
     }
 };
