@@ -43,19 +43,20 @@ module.exports = async (req, res) => {
         } catch (error) {
             console.error("❌ [USER] Token inválido ou expirado:", error.message);
 
-            // Se o erro for "Invalid Credentials", tentamos renovar o token
+            // 🔹 Tenta renovar o token se houver um refresh_token disponível
             if (error.message.includes("invalid_grant") || error.message.includes("credentials")) {
-                console.log("🔄 Tentando renovar o token...");
-            
+                console.log("🔄 Tentando renovar o token de acesso...");
+
                 try {
                     const { tokens } = await oauth2Client.refreshAccessToken();
                     oauth2Client.setCredentials(tokens);
+
                     console.log("✅ Token renovado com sucesso!");
-            
+
                     // Obtém os dados do usuário novamente com o novo token
                     const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
                     const { data } = await oauth2.userinfo.get();
-            
+
                     return res.json({
                         name: data.name,
                         email: data.email,
@@ -67,7 +68,6 @@ module.exports = async (req, res) => {
                     return res.status(401).json({ error: "Token expirado. Faça login novamente." });
                 }
             }
-            
 
             return res.status(401).json({ error: "Token inválido ou expirado. Faça login novamente." });
         }

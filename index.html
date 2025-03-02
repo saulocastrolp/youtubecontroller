@@ -96,13 +96,15 @@
                 if (data.error) {
                     console.warn("⚠️ Token expirado ou inválido. Tentando renovar...");
 
+                    // Se o backend retornou um novo token, armazenamos ele no localStorage
                     if (data.new_access_token) {
-                        console.log("🔄 Token renovado. Atualizando...");
+                        console.log("🔄 Atualizando token de acesso...");
                         localStorage.setItem("access_token", data.new_access_token);
-                        return getUserInfo();
+                        return getUserInfo(); // Chama novamente com o novo token
                     }
 
-                    console.warn("🚫 Token inválido. Não redirecionando para evitar loop.");
+                    console.warn("🚫 Token inválido. Redirecionando para login...");
+                    setTimeout(authenticate, 2000);
                 } else {
                     document.getElementById("login-btn").style.display = "none";
                     document.getElementById("user-info").style.display = "flex";
@@ -113,6 +115,7 @@
                 console.error("Erro ao obter dados do usuário:", error);
             }
         }
+
 
 
         async function sync() {
