@@ -5,7 +5,9 @@ const { google } = require("googleapis");
 require("dotenv").config();
 
 const app = express();
-const PORT = 3000;
+
+// 📌 A Vercel define a porta automaticamente, então NÃO precisamos definir manualmente
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -18,7 +20,12 @@ const oauth2Client = new google.auth.OAuth2(
 
 // Armazena o status da música/vídeo e o dispositivo atual
 let currentTrack = {};
-let currentDevice = null; // "pc" ou "mobile"
+let currentDevice = null;
+
+// 📌 Ajustamos as URLs para serem compatíveis com a Vercel
+app.get("/", (req, res) => {
+    res.send("YouTube & YouTube Music Connect API rodando 🚀");
+});
 
 // 🔹 Autenticação OAuth2
 app.get("/login", (req, res) => {
@@ -75,65 +82,34 @@ app.post("/sync", (req, res) => {
     res.json({ message: `Música sincronizada no ${device}.` });
 });
 
-// 🔹 Obtém a música/vídeo sincronizado para reprodução em outro dispositivo
+// 🔹 Obtém a música/vídeo sincronizado
 app.get("/sync", (req, res) => {
     res.json({ currentTrack, currentDevice });
 });
 
-// 🔹 Transfere a reprodução entre dispositivos
+// 🔹 Transferir reprodução
 app.post("/transfer", async (req, res) => {
     const { device } = req.body;
-
     if (!currentTrack.videoId) {
         return res.json({ error: "Nenhuma música/vídeo para transferir." });
     }
 
     currentDevice = device;
-
     res.json({
         message: `Reprodução transferida para ${device}.`,
         videoId: currentTrack.videoId,
     });
 });
 
-// 🔹 Controles de Reprodução
-app.post("/play", async (req, res) => {
-    // Simula Play (API do YouTube não permite controle direto)
-    res.json({ message: "Reprodução iniciada! (Simulado)" });
-});
+// 🔹 Controles de Reprodução (simulados, pois a API do YouTube não permite controle direto)
+app.post("/play", (req, res) => res.json({ message: "▶️ Play (Simulado)" }));
+app.post("/pause", (req, res) => res.json({ message: "⏸️ Pause (Simulado)" }));
+app.post("/next", (req, res) => res.json({ message: "⏭️ Próxima (Simulado)" }));
+app.post("/previous", (req, res) => res.json({ message: "⏮️ Anterior (Simulado)" }));
+app.post("/like", (req, res) => res.json({ message: "❤️ Curtido (Simulado)" }));
+app.post("/dislike", (req, res) => res.json({ message: "👎 Não Curtido (Simulado)" }));
+app.post("/shuffle", (req, res) => res.json({ message: "🔀 Shuffle Ativado (Simulado)" }));
+app.post("/repeat", (req, res) => res.json({ message: "🔁 Repeat Ativado (Simulado)" }));
 
-app.post("/pause", async (req, res) => {
-    res.json({ message: "Reprodução pausada! (Simulado)" });
-});
-
-app.post("/next", async (req, res) => {
-    res.json({ message: "Próxima faixa! (Simulado)" });
-});
-
-app.post("/previous", async (req, res) => {
-    res.json({ message: "Vídeo anterior! (Simulado)" });
-});
-
-// 🔹 Like/Dislike
-app.post("/like", async (req, res) => {
-    res.json({ message: "Vídeo curtido! (Simulado)" });
-});
-
-app.post("/dislike", async (req, res) => {
-    res.json({ message: "Vídeo não curtido! (Simulado)" });
-});
-
-// 🔹 Ativar/Desativar Shuffle
-app.post("/shuffle", async (req, res) => {
-    res.json({ message: "Modo Aleatório ativado! (Simulado)" });
-});
-
-// 🔹 Ativar/Desativar Repeat
-app.post("/repeat", async (req, res) => {
-    res.json({ message: "Modo Repetição ativado! (Simulado)" });
-});
-
-// 🔹 Inicia o servidor
-app.listen(PORT, () => {
-    console.log(`Servidor rodando em https://youtubecontroller.vercel.app:${PORT}`);
-});
+// 📌 Vercel não usa `app.listen(PORT)`, então exportamos a API
+module.exports = app;
