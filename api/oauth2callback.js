@@ -23,11 +23,13 @@ module.exports = async (req, res) => {
 
         console.log("✅ [OAUTH CALLBACK] Tokens obtidos:", tokens);
 
-        // 🔥 Verifica se o token tem os escopos corretos antes de redirecionar
+        // 🔍 Verifica se os escopos concedidos incluem os necessários
         const tokenInfo = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${tokens.access_token}`)
             .then(response => response.json());
 
-        if (!tokenInfo.scope.includes("https://www.googleapis.com/auth/userinfo.profile")) {
+        if (!tokenInfo.scope.includes("https://www.googleapis.com/auth/youtube.readonly") ||
+            !tokenInfo.scope.includes("https://www.googleapis.com/auth/youtube.force-ssl") ||
+            !tokenInfo.scope.includes("https://www.googleapis.com/auth/youtube")) {
             console.error("❌ O escopo do token é inválido. Revogando acesso...");
             return res.status(403).json({ error: "Escopo inválido. Revogue o acesso e tente novamente." });
         }
