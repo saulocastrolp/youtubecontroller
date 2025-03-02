@@ -5,6 +5,7 @@ body * {
 }
 
 body hr {
+    width: 100%;
     color: #303030;
     background-color: #303030;
     border-bottom: 1px dashed #303030;
