@@ -4,85 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Music Connect</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
     <link href="style.css" rel="stylesheet">
     <script>
-          let API_URL = "https://youtubecontroller.vercel.app/api";
+        let API_URL = "https://youtubecontroller.vercel.app/api";
 
-          async function handleAuthCallback() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const accessToken = urlParams.get("access_token");
+        async function handleAuthCallback() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const accessToken = urlParams.get("access_token");
 
-        if (accessToken) {
-            localStorage.setItem("access_token", accessToken);
-            window.history.replaceState({}, document.title, "/"); // Remove o token da URL
-            getUserInfo();
-        }
-    }
-
-
-async function sendCommand(endpoint) {
-    await fetch(`${API_URL}/${endpoint}`, { method: "POST" });
-}
-
-async function authenticate() {
-        window.location.href = `${API_URL}/login`;
-    }
-
-async function getStatus() {
-    const response = await fetch(`${API_URL}/status`);
-    const data = await response.json();
-    document.getElementById("music-title").innerText = data.title || "Nenhum vídeo/música tocando";
-}
-
-async function getUserInfo() {
-        const accessToken = localStorage.getItem("access_token");
-
-        if (!accessToken) {
-            document.getElementById("login-btn").style.display = "block";
-            document.getElementById("user-info").style.display = "none";
-            return;
+            if (accessToken) {
+                localStorage.setItem("access_token", accessToken);
+                window.history.replaceState({}, document.title, "/"); // Remove o token da URL
+                getUserInfo();
+            }
         }
 
-        try {
-            const response = await fetch(`${API_URL}/user`, {
+        async function sendCommand(endpoint) {
+            const accessToken = localStorage.getItem("access_token");
+
+            if (!accessToken) {
+                console.warn("⚠️ Usuário não autenticado. Redirecionando para login...");
+                authenticate();
+                return;
+            }
+
+            await fetch(`${API_URL}/${endpoint}`, {
+                method: "POST",
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
                 },
             });
+        }
 
-            const data = await response.json();
+        async function authenticate() {
+            window.location.href = `${API_URL}/login`;
+        }
 
-            if (data.error) {
-                console.warn("⚠️ Token expirado. Redirecionando para login...");
-                localStorage.removeItem("access_token");
-                authenticate();
-            } else {
-                document.getElementById("login-btn").style.display = "none";
-                document.getElementById("user-info").style.display = "flex";
-                document.getElementById("user-name").innerText = data.name;
-                document.getElementById("user-photo").src = data.picture;
+        async function getStatus() {
+            const accessToken = localStorage.getItem("access_token");
+
+            if (!accessToken) {
+                console.warn("⚠️ Token ausente. Status não pode ser carregado.");
+                return;
             }
-        } catch (error) {
-            console.error("Erro ao obter dados do usuário:", error);
+
+            try {
+                const response = await fetch(`${API_URL}/status`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    console.warn("⚠️ Token inválido. Redirecionando para login...");
+                    localStorage.removeItem("access_token");
+                    authenticate();
+                } else {
+                    document.getElementById("music-title").innerText = data.title || "Nenhuma música tocando";
+                    document.getElementById("artist-name").innerText = data.channel || "";
+                }
+            } catch (error) {
+                console.error("Erro ao obter status:", error);
+            }
         }
-    }
 
-    window.onload = function () {
-        handleAuthCallback();
-        getUserInfo();
-    };
+        async function getUserInfo() {
+            const accessToken = localStorage.getItem("access_token");
 
+            if (!accessToken) {
+                document.getElementById("login-btn").style.display = "block";
+                document.getElementById("user-info").style.display = "none";
+                return;
+            }
 
+            try {
+                const response = await fetch(`${API_URL}/user`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
 
-setInterval(() => {
-    const accessToken = localStorage.getItem("access_token");
+                const data = await response.json();
 
-        if (!accessToken) {
+                if (data.error) {
+                    console.warn("⚠️ Token expirado. Redirecionando para login...");
+                    localStorage.removeItem("access_token");
+                    authenticate();
+                } else {
+                    document.getElementById("login-btn").style.display = "none";
+                    document.getElementById("user-info").style.display = "flex";
+                    document.getElementById("user-name").innerText = data.name;
+                    document.getElementById("user-photo").src = data.picture;
+                }
+            } catch (error) {
+                console.error("Erro ao obter dados do usuário:", error);
+            }
+        }
+
+        async function sync() {
+            console.log("🔄 Sincronizar não implementado ainda.");
+        }
+
+        async function transferPlayback() {
+            console.log("📲 Transferência de reprodução não implementada ainda.");
+        }
+
+        window.onload = function () {
+            handleAuthCallback();
+            getUserInfo();
             getStatus();
-        }
-}, 5000);
+        };
+
+        setInterval(() => {
+            getStatus();
+        }, 10000);
     </script>
+    <style>
+        #user-info {
+            display: none;
+            align-items: center;
+            gap: 10px;
+        }
+        #user-photo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -117,16 +168,8 @@ setInterval(() => {
             <button class="btn btn-dark" onclick="sendCommand('shuffle')">🔀 Aleatório</button>
             <button class="btn btn-dark" onclick="sendCommand('repeat')">🔁 Repetir</button>
         </div>
-        
-    
-        <!--br><br>
-        <div class="btn-group">
-            <button class="btn btn-dark" onclick="syncMusic()">🔄 Sincronizar Música</button>
-            <button class="btn btn-dark" onclick="playOnDevice()">📲 Tocar no Celular/PC</button>
-        </div-->
     </div>
     
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
 </body>
 </html>
