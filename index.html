@@ -65,7 +65,7 @@
 
                 if (data.error) {
                     console.warn("⚠️ Token inválido. Redirecionando para login...");
-                    localStorage.removeItem("access_token");
+                    //localStorage.removeItem("access_token");
                     authenticate();
                 } else {
                     document.getElementById("music-title").innerText = data.title || "Nenhuma música tocando";
