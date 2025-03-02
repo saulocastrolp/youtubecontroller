@@ -19,6 +19,18 @@ body .container {
     align-items: center;
 }
 
+body .container #user-info {
+    display: none;
+    align-items: center;
+    gap: 10px;
+}
+
+body .container #user-photo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
 body .container h1 {
     font-family: "Sigmar", sans-serif;
     color: #ff0033;
