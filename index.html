@@ -14,11 +14,12 @@
             const accessToken = urlParams.get("access_token");
 
             if (accessToken) {
+                console.log("🔹 Token recebido na URL:", accessToken);
                 localStorage.setItem("access_token", accessToken);
                 window.history.replaceState({}, document.title, "/"); // Remove o token da URL
-                getUserInfo();
             }
         }
+
 
         async function sendCommand(endpoint) {
             const accessToken = localStorage.getItem("access_token");
@@ -75,8 +76,7 @@
             const accessToken = localStorage.getItem("access_token");
 
             if (!accessToken) {
-                document.getElementById("login-btn").style.display = "block";
-                document.getElementById("user-info").style.display = "none";
+                console.warn("⚠️ Nenhum token armazenado. Usuário não autenticado.");
                 return;
             }
 
@@ -90,9 +90,18 @@
                 const data = await response.json();
 
                 if (data.error) {
-                    console.warn("⚠️ Token expirado. Redirecionando para login...");
-                    localStorage.removeItem("access_token");
-                    authenticate();
+                    console.warn("⚠️ Token expirado ou inválido. Tentando renovar...");
+
+                    // Tentativa de renovação do token antes de forçar login
+                    if (data.new_access_token) {
+                        console.log("🔄 Token renovado. Atualizando...");
+                        localStorage.setItem("access_token", data.new_access_token);
+                        return getUserInfo(); // Chama novamente com o novo token
+                    }
+
+                    // Se não houver renovação, apenas alerta o usuário
+                    console.warn("🚫 Redirecionando para login...");
+                    setTimeout(authenticate, 2000); // Espera 2s antes de redirecionar
                 } else {
                     document.getElementById("login-btn").style.display = "none";
                     document.getElementById("user-info").style.display = "flex";
@@ -103,6 +112,7 @@
                 console.error("Erro ao obter dados do usuário:", error);
             }
         }
+
 
         async function sync() {
             console.log("🔄 Sincronizar não implementado ainda.");
