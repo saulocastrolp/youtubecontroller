@@ -39,17 +39,26 @@ body .container h1 {
     text-align: center;
 }
 
-body .container h2#music-title {
+body .container .container-musica-artista {
+    width: 100%;
+    background-color: #ff0033;
+    border: 1px solid #686868;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 1rem;
+}
+
+body .container .container-musica-artista h2#music-title {
     font-family: "Sigmar", sans-serif;
-    color: #ff0033;
+    color: #fff;
     font-size: 2rem;
     font-weight: bold;
     text-align: center;
 }
 
-body .container h3#artist-name {
+body .container .container-musica-artista h3#artist-name {
     font-family: "Poppins", sans-serif;
-    color: #ff0033;
+    color: #fff;
     font-size: 1.5rem;
     text-align: center;
 }
