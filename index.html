@@ -35,13 +35,22 @@
                 return;
             }
 
-            await fetch(`${API_URL}/${endpoint}`, {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
+            try {
+                console.log(`📡 Enviando comando: ${endpoint}`);
+                const response = await fetch(`${API_URL}/${endpoint}`, {
+                    method: "POST",
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+
+                const data = await response.json();
+                console.log("✅ Resposta do servidor:", data.message);
+            } catch (error) {
+                console.error("❌ Erro ao enviar comando:", error);
+            }
         }
+
 
         async function authenticate() {
             window.location.href = `${API_URL}/login`;
