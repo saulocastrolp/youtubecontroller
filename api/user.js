@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
         }
 
         // 🔹 Obtém o token do cabeçalho Authorization
-        const accessToken = req.headers.authorization?.split(" ")[1];
+        let accessToken = req.headers.authorization?.split(" ")[1];
 
         if (!accessToken) {
             console.warn("⚠️ [USER] Token de acesso não fornecido.");
