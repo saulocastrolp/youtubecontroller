@@ -20,7 +20,7 @@ async function authenticate() {
 async function getStatus() {
     const response = await fetch(`${API_URL}/status`);
     const data = await response.json();
-    document.getElementById("video-title").innerText = data.title || "Nenhum vídeo/música tocando";
+    document.getElementById("music-title").innerText = data.title || "Nenhum vídeo/música tocando";
 }
 
 async function getUserInfo() {
