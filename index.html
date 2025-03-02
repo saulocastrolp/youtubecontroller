@@ -71,13 +71,15 @@ setInterval(getStatus, 5000);
             <button class="btn btn-dark" onclick="sync()">🔄 Sincronizar</button>
             <button class="btn btn-dark" onclick="transferPlayback()">📲 Transferir Reprodução</button>
         </div>
+        <hr/>
         <div class="btn-group">
             <button class="btn btn-dark" onclick="sendCommand('play')">▶️ Play</button>
             <button class="btn btn-dark" onclick="sendCommand('pause')">⏸️ Pause</button>
             <button class="btn btn-dark" onclick="sendCommand('previous')">⏮️ Anterior</button>
             <button class="btn btn-dark" onclick="sendCommand('next')">⏭️ Próxima</button>
         </div>
-        <div class="btn-group"></div>
+        <hr/>
+        <div class="btn-group">
             <button class="btn btn-dark" onclick="sendCommand('like')">❤️ Curtir</button>
             <button class="btn btn-dark" onclick="sendCommand('dislike')">👎 Não Curtir</button>
             <button class="btn btn-dark" onclick="sendCommand('shuffle')">🔀 Aleatório</button>
