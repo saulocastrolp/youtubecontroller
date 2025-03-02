@@ -10,7 +10,7 @@ module.exports = async (req, res) => {
         }
 
         // 🔹 Obtém o token do cabeçalho Authorization
-        let accessToken = req.headers.authorization?.split(" ")[1];
+        const accessToken = req.headers.authorization?.split(" ")[1];
         console.log("🔍 [TOKEN RECUPERADO] O token recuperado foi: " + accessToken);
 
         if (!accessToken) {
@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
             });
 
         } catch (error) {
-            console.error("❌ [USER] Token inválido ou expirado:", error.message);
+            console.error("❌ [USER] Token inválido ou expirado:", error.message, );
 
             // 🔹 Tenta renovar o token se houver um refresh_token disponível
             if (error.message.includes("invalid_grant") || error.message.includes("credentials")) {
@@ -70,7 +70,7 @@ module.exports = async (req, res) => {
                 }
             }
 
-            return res.status(401).json({ error: "Token inválido ou expirado. Faça login novamente." });
+            return res.status(401).json({ error: "Token inválido ou expirado. Faça login novamente. Token recuperado: " + accessToken });
         }
     } catch (error) {
         console.error("❌ [USER] Erro ao buscar informações do usuário:", error.message);
