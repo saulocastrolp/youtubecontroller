@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Music Connect</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <link href="style.css" rel="stylesheet">
+    <script>
+         let device = "pc"; // Defina como "mobile" se estiver no celular
+
+async function getStatus() {
+    const response = await fetch("http://localhost:3000/status");
+    const data = await response.json();
+    document.getElementById("video-title").innerText = data.title || "Nenhum vídeo/música tocando";
+    document.getElementById("channel-name").innerText = data.channel || "";
+}
+
+async function authenticate() {
+    window.location.href = "http://localhost:3000/login";
+}
+
+async function sendCommand(endpoint) {
+    await fetch(`http://localhost:3000/${endpoint}`, { method: "POST" });
+}
+
+async function transferPlayback() {
+    const response = await fetch("http://localhost:3000/transfer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ device: device === "pc" ? "mobile" : "pc" }),
+    });
+
+    const data = await response.json();
+
+    if (data.videoId) {
+        if (device === "pc") {
+            window.open(`https://www.youtube.com/watch?v=${data.videoId}`, "_blank");
+        } else {
+            alert(`Reprodução transferida para o PC. Abra o YouTube e pesquise: ${data.videoId}`);
+        }
+    } else {
+        alert("Nenhuma música/vídeo disponível para transferir.");
+    }
+}
+
+async function sync() {
+    const response = await fetch("http://localhost:3000/status");
+    const data = await response.json();
+    await fetch("http://localhost:3000/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ device, track: data }),
+    });
+    alert("Sincronizado!");
+}
+
+setInterval(getStatus, 5000);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Music Connect</h1>
+        <br/>
+        <button class="btn btn-dark" onclick="authenticate()">🔑 Login</button>
+        <br/>
+        <h2 id="music-title">Nenhuma música tocando...</h2>
+        <h3 id="artist-name"></h3>
+    
+        <div class="btn-group">
+            <button class="btn btn-dark" onclick="sync()">🔄 Sincronizar</button>
+            <button class="btn btn-dark" onclick="transferPlayback()">📲 Transferir Reprodução</button>
+        </div>
+        <div class="btn-group">
+            <button class="btn btn-dark" onclick="sendCommand('play')">▶️ Play</button>
+            <button class="btn btn-dark" onclick="sendCommand('pause')">⏸️ Pause</button>
+            <button class="btn btn-dark" onclick="sendCommand('previous')">⏮️ Anterior</button>
+            <button class="btn btn-dark" onclick="sendCommand('next')">⏭️ Próxima</button>
+        </div>
+        <div class="btn-group"></div>
+            <button class="btn btn-dark" onclick="sendCommand('like')">❤️ Curtir</button>
+            <button class="btn btn-dark" onclick="sendCommand('dislike')">👎 Não Curtir</button>
+            <button class="btn btn-dark" onclick="sendCommand('shuffle')">🔀 Aleatório</button>
+            <button class="btn btn-dark" onclick="sendCommand('repeat')">🔁 Repetir</button>
+        </div>
+        
+    
+        <!--br><br>
+        <div class="btn-group">
+            <button class="btn btn-dark" onclick="syncMusic()">🔄 Sincronizar Música</button>
+            <button class="btn btn-dark" onclick="playOnDevice()">📲 Tocar no Celular/PC</button>
+        </div-->
+    </div>
+    
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+</html>
