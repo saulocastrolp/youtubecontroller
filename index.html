@@ -17,8 +17,12 @@
                 console.log("🔹 Token recebido na URL:", accessToken);
                 localStorage.setItem("access_token", accessToken);
                 window.history.replaceState({}, document.title, "/"); // Remove o token da URL
+                getUserInfo();
+            } else {
+                console.warn("⚠️ Nenhum token encontrado na URL.");
             }
         }
+
 
 
         async function sendCommand(endpoint) {
@@ -92,16 +96,13 @@
                 if (data.error) {
                     console.warn("⚠️ Token expirado ou inválido. Tentando renovar...");
 
-                    // Tentativa de renovação do token antes de forçar login
                     if (data.new_access_token) {
                         console.log("🔄 Token renovado. Atualizando...");
                         localStorage.setItem("access_token", data.new_access_token);
-                        return getUserInfo(); // Chama novamente com o novo token
+                        return getUserInfo();
                     }
 
-                    // Se não houver renovação, apenas alerta o usuário
-                    console.warn("🚫 Redirecionando para login...");
-                    setTimeout(authenticate, 2000); // Espera 2s antes de redirecionar
+                    console.warn("🚫 Token inválido. Não redirecionando para evitar loop.");
                 } else {
                     document.getElementById("login-btn").style.display = "none";
                     document.getElementById("user-info").style.display = "flex";

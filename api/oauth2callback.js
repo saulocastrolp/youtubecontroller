@@ -23,7 +23,7 @@ module.exports = async (req, res) => {
 
         console.log("✅ [OAUTH CALLBACK] Tokens obtidos:", tokens);
 
-        // Redireciona para a página principal com o token na URL
+        // Redireciona para a página inicial com o token na URL
         res.redirect(`/?access_token=${tokens.access_token}`);
     } catch (error) {
         console.error("❌ [OAUTH CALLBACK] Erro ao processar autenticação:", error);
