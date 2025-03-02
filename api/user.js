@@ -11,6 +11,7 @@ module.exports = async (req, res) => {
 
         // 🔹 Obtém o token do cabeçalho Authorization
         let accessToken = req.headers.authorization?.split(" ")[1];
+        console.log("🔍 [TOKEN RECUPERADO] O token recuperado foi: " + accessToken);
 
         if (!accessToken) {
             console.warn("⚠️ [USER] Token de acesso não fornecido.");
