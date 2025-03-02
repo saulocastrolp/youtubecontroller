@@ -66,23 +66,22 @@
 
             try {
                 const response = await fetch(`${API_URL}/status`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
+                    headers: { Authorization: `Bearer ${accessToken}` }
                 });
 
                 const data = await response.json();
 
                 if (data.error) {
                     console.warn("⚠️ Token inválido. Redirecionando para login...");
-                    //localStorage.removeItem("access_token");
                     authenticate();
                 } else {
                     document.getElementById("music-title").innerText = data.title || "Nenhuma música tocando";
                     document.getElementById("artist-name").innerText = data.channel || "";
                 }
+
+                console.log(`🎵 Música atualizada: ${data.title} - ${data.channel}`);
             } catch (error) {
-                console.error("Erro ao obter status:", error);
+                console.error("❌ Erro ao obter status:", error);
             }
         }
 
@@ -138,17 +137,21 @@
             }
 
             try {
+                console.log("🎵 Obtendo música atual...");
                 const response = await fetch(`${API_URL}/getCurrentTrack`, {
                     headers: { Authorization: `Bearer ${accessToken}` }
                 });
 
                 const data = await response.json();
-                currentVideoId = data.videoId; // 🔥 Armazena o ID globalmente para pause e repeat
+                currentVideoId = data.videoId; // 🔥 Armazena o ID para controle
+                document.getElementById("music-title").innerText = data.title; // 🔥 Atualiza o título na interface
+
                 console.log("🎵 Música atual:", data.title, "ID:", data.videoId);
             } catch (error) {
                 console.error("❌ Erro ao buscar a música atual:", error);
             }
         }
+
 
         async function sync() {
             const accessToken = localStorage.getItem("access_token");
@@ -203,7 +206,8 @@
 
         setInterval(() => {
             getStatus();
-        }, 10000);
+            getCurrentTrack();
+        }, 5000);
     </script>
     <style>
         #user-info {

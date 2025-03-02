@@ -1,54 +1,49 @@
 const { google } = require("googleapis");
 
 module.exports = async (req, res) => {
-    console.log("🔍 [STATUS] Iniciando request para obter status...");
-
     try {
-        if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.REDIRECT_URI) {
-            console.error("❌ ERRO: Variáveis de ambiente não definidas!");
-            return res.status(500).json({ error: "Variáveis de ambiente não configuradas." });
-        }
+        console.log("🎵 [STATUS] Obtendo status da reprodução...");
 
-        // 🔹 Obtém o token do cabeçalho Authorization
         const accessToken = req.headers.authorization?.split(" ")[1];
 
         if (!accessToken) {
-            console.warn("⚠️ [STATUS] Token de acesso não fornecido.");
-            return res.status(401).json({ error: "Token de acesso ausente. Faça login novamente." });
+            return res.status(401).json({ error: "Token de acesso ausente." });
         }
 
-        console.log("✅ [STATUS] Token recebido:", accessToken);
+        const oauth2Client = new google.auth.OAuth2(
+            process.env.CLIENT_ID,
+            process.env.CLIENT_SECRET,
+            process.env.REDIRECT_URI
+        );
 
-        // 🔹 Define o token de acesso antes de chamar a API do YouTube
-        const oauth2Client = new google.auth.OAuth2();
         oauth2Client.setCredentials({ access_token: accessToken });
 
-        console.log("📡 [STATUS] Criado OAuth2Client com token...");
-
-        const youtube = google.youtube({ version: "v3", auth: oauth2Client });
-
-        // 🔹 Faz a requisição autenticada à API do YouTube
-        const response = await youtube.activities.list({
-            part: "snippet,contentDetails",
-            mine: true,
-            maxResults: 1,
+        const youtube = google.youtube({
+            version: "v3",
+            auth: oauth2Client
         });
 
-        if (!response.data || response.data.items.length === 0) {
-            console.warn("⚠️ [STATUS] Nenhuma reprodução encontrada.");
-            return res.json({ message: "Nenhuma reprodução encontrada." });
+        // 🔥 Obtém o histórico de vídeos assistidos (tentando pegar o YouTube Music)
+        const response = await youtube.playlistItems.list({
+            part: "snippet",
+            playlistId: "HL", // Playlist de histórico do usuário
+            maxResults: 1
+        });
+
+        if (response.data.items.length === 0) {
+            return res.json({ title: "Nenhuma música tocando", channel: "" });
         }
 
         const video = response.data.items[0].snippet;
-        console.log("✅ [STATUS] Dados obtidos:", video);
+        const videoId = video.resourceId.videoId;
+        const title = video.title;
+        const channel = video.channelTitle;
 
-        res.json({
-            title: video.title,
-            channel: video.channelTitle,
-            videoId: response.data.items[0].contentDetails.upload?.videoId || null,
-        });
+        console.log(`✅ [STATUS] Música atual: ${title} - ${channel}`);
+
+        res.json({ title, channel, videoId });
     } catch (error) {
-        console.error("❌ [STATUS] Erro ao buscar informações do status:", error.message);
+        console.error("❌ [STATUS] Erro ao buscar status da reprodução:", error.message);
         res.status(500).json({ error: "Erro ao buscar status da reprodução.", details: error.message });
     }
 };
