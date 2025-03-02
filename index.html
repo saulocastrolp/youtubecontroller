@@ -77,7 +77,7 @@
         }
 
         async function getUserInfo() {
-            const accessToken = localStorage.getItem("access_token");
+            let accessToken = localStorage.getItem("access_token");
             console.log("🔍 Enviando token para a API:", accessToken);
 
 
@@ -96,7 +96,7 @@
                 const data = await response.json();
 
                 if (data.error) {
-                    console.warn("⚠️ Token expirado ou inválido. Tentando renovar...");
+                    console.warn("⚠️ Token expirado ou inválido para obter as informações do usuário. Tentando renovar...");
 
                     // Se o backend retornou um novo token, armazenamos ele no localStorage
                     if (data.new_access_token) {
@@ -105,7 +105,7 @@
                         return getUserInfo(); // Chama novamente com o novo token
                     }
 
-                    console.warn("🚫 Token inválido. Redirecionando para login...");
+                    console.warn("🚫 Token inválido para renovar os dados do usuário. Redirecionando para login...");
                     //setTimeout(authenticate, 2000);
                 } else {
                     document.getElementById("login-btn").style.display = "none";

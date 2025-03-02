@@ -40,8 +40,8 @@ body .container h1 {
 }
 
 body .container h2#music-title {
-    font-family: "Poppins", sans-serif;
-    color: #303030;
+    font-family: "Sigmar", sans-serif;
+    color: #ff0033;
     font-size: 2rem;
     font-weight: bold;
     text-align: center;
@@ -49,7 +49,7 @@ body .container h2#music-title {
 
 body .container h3#artist-name {
     font-family: "Poppins", sans-serif;
-    color: #303030;
+    color: #ff0033;
     font-size: 1.5rem;
     text-align: center;
 }
