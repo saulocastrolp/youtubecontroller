@@ -1,25 +1,5 @@
 const { google } = require("googleapis");
 
-const oauth2Client = new google.auth.OAuth2(
-    process.env.CLIENT_ID,
-    process.env.CLIENT_SECRET,
-    process.env.REDIRECT_URI
-);
-
-module.exports = (req, res) => {
-    const authUrl = oauth2Client.generateAuthUrl({
-        access_type: "offline",
-        scope: [
-            "https://www.googleapis.com/auth/youtube",
-            "https://www.googleapis.com/auth/youtube.force-ssl",
-        ],
-    });
-    res.redirect(authUrl);
-};
-
-
-const { google } = require("googleapis");
-
 module.exports = async (req, res) => {
     console.log("🔍 [LOGIN] Redirecionando para autenticação do Google...");
 
