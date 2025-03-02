@@ -1,31 +1,40 @@
 const { google } = require("googleapis");
 
 module.exports = async (req, res) => {
-    console.log("🔍 Iniciando request para obter usuário...");
+    console.log("🔍 [USER] Iniciando request para obter informações do usuário...");
 
     try {
+        if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.REDIRECT_URI) {
+            console.error("❌ ERRO: Variáveis de ambiente não definidas!");
+            return res.status(500).json({ error: "Variáveis de ambiente não configuradas." });
+        }
+
         const oauth2Client = new google.auth.OAuth2(
             process.env.CLIENT_ID,
             process.env.CLIENT_SECRET,
             process.env.REDIRECT_URI
         );
 
-        console.log("📡 Criado OAuth2Client...");
+        console.log("📡 [USER] Criado OAuth2Client...");
 
-        const tokens = req.cookies ? req.cookies.tokens : null;
-        if (!tokens) {
-            console.log("⚠️ Usuário não autenticado. Tokens não encontrados.");
-            return res.status(401).json({ error: "Usuário não autenticado" });
+        // PEGAR TOKEN DO COOKIE
+        const cookies = req.headers.cookie ? req.headers.cookie.split("; ") : [];
+        const tokenCookie = cookies.find(c => c.startsWith("oauth_token="));
+        if (!tokenCookie) {
+            console.warn("⚠️ [USER] Nenhum token encontrado nos cookies. Usuário não autenticado.");
+            return res.status(401).json({ error: "Usuário não autenticado. Faça login." });
         }
 
-        oauth2Client.setCredentials(JSON.parse(tokens));
+        const tokens = JSON.parse(decodeURIComponent(tokenCookie.split("=")[1]));
+        oauth2Client.setCredentials(tokens);
 
-        console.log("🔑 Tokens definidos. Buscando informações do usuário...");
+        console.log("🔑 [USER] Token OAuth2 recuperado:", tokens);
 
+        // OBTER DADOS DO USUÁRIO
         const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
         const { data } = await oauth2.userinfo.get();
 
-        console.log("✅ Dados do usuário obtidos:", data);
+        console.log("✅ [USER] Dados do usuário obtidos:", data);
 
         res.json({
             name: data.name,
@@ -33,7 +42,7 @@ module.exports = async (req, res) => {
             picture: data.picture,
         });
     } catch (error) {
-        console.error("❌ Erro ao buscar informações do usuário:", error);
-        res.status(500).json({ error: "Erro ao buscar informações do usuário" });
+        console.error("❌ [USER] Erro ao buscar informações do usuário:", error.message);
+        res.status(500).json({ error: "Erro ao buscar informações do usuário.", details: error.message });
     }
 };

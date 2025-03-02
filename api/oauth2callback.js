@@ -12,10 +12,14 @@ module.exports = async (req, res) => {
         const { tokens } = await oauth2Client.getToken(code);
         oauth2Client.setCredentials(tokens);
 
-        // Armazena os tokens em cookies para manter a sessão ativa
-        res.setHeader("Set-Cookie", `tokens=${JSON.stringify(tokens)}; Path=/; HttpOnly; Secure; SameSite=Strict`);
-        res.redirect("/"); // Redireciona para a página inicial
+        console.log("✅ [AUTH] Token OAuth2 recebido:", tokens);
+
+        // Salvar o token em um cookie HTTP-only para segurança
+        res.setHeader("Set-Cookie", `oauth_token=${JSON.stringify(tokens)}; Path=/; HttpOnly; Secure; SameSite=Strict`);
+
+        res.redirect("/"); // Redirecionar de volta para a página principal
     } catch (error) {
-        res.status(500).json({ error: "Erro ao processar autenticação" });
+        console.error("❌ [AUTH] Erro ao processar autenticação:", error.message);
+        res.status(500).json({ error: "Erro ao processar autenticação." });
     }
 };
