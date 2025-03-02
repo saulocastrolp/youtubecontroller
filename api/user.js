@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
             });
 
         } catch (error) {
-            console.error("❌ [USER] Token inválido ou expirado:", error.message, );
+            console.error("❌ [USER] Token inválido ou expirado: Token recuperado: " + accessToken, error.message, );
 
             // 🔹 Tenta renovar o token se houver um refresh_token disponível
             if (error.message.includes("invalid_grant") || error.message.includes("credentials")) {
