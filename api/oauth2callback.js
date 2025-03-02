@@ -23,8 +23,8 @@ module.exports = async (req, res) => {
 
         console.log("✅ [OAUTH CALLBACK] Tokens obtidos:", tokens);
 
-        // Retorna o token ao front-end
-        res.json({ access_token: tokens.access_token });
+        // Redireciona para a página principal com o token na URL
+        res.redirect(`/?access_token=${tokens.access_token}`);
     } catch (error) {
         console.error("❌ [OAUTH CALLBACK] Erro ao processar autenticação:", error);
         res.status(500).json({ error: "Erro ao processar autenticação." });

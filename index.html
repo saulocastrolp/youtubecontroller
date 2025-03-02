@@ -9,23 +9,24 @@
     <script>
           let API_URL = "https://youtubecontroller.vercel.app/api";
 
-async function sendCommand(endpoint) {
-    await fetch(`${API_URL}/${endpoint}`, { method: "POST" });
-}
-
-async function authenticate() {
-        window.location.href = `${API_URL}/login`;
-    }
-
-    async function handleAuthCallback() {
+          async function handleAuthCallback() {
         const urlParams = new URLSearchParams(window.location.search);
         const accessToken = urlParams.get("access_token");
 
         if (accessToken) {
             localStorage.setItem("access_token", accessToken);
             window.history.replaceState({}, document.title, "/"); // Remove o token da URL
-            getUserInfo(); // Atualiza a interface do usuário
+            getUserInfo();
         }
+    }
+
+
+async function sendCommand(endpoint) {
+    await fetch(`${API_URL}/${endpoint}`, { method: "POST" });
+}
+
+async function authenticate() {
+        window.location.href = `${API_URL}/login`;
     }
 
 async function getStatus() {
@@ -53,6 +54,7 @@ async function getUserInfo() {
             const data = await response.json();
 
             if (data.error) {
+                console.warn("⚠️ Token expirado. Redirecionando para login...");
                 localStorage.removeItem("access_token");
                 authenticate();
             } else {

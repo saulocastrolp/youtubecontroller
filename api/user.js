@@ -21,16 +21,20 @@ module.exports = async (req, res) => {
         const oauth2Client = new google.auth.OAuth2();
         oauth2Client.setCredentials({ access_token: accessToken });
 
-        const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
-        const { data } = await oauth2.userinfo.get();
-
-        console.log("✅ [USER] Dados do usuário obtidos:", data);
-
-        res.json({
-            name: data.name,
-            email: data.email,
-            picture: data.picture,
-        });
+        // 🔹 Tenta buscar dados do usuário
+        try {
+            const oauth2 = google.oauth2({ version: "v2", auth: oauth2Client });
+            const { data } = await oauth2.userinfo.get();
+            console.log("✅ [USER] Dados do usuário obtidos:", data);
+            return res.json({
+                name: data.name,
+                email: data.email,
+                picture: data.picture,
+            });
+        } catch (error) {
+            console.error("❌ [USER] Token inválido ou expirado:", error.message);
+            return res.status(401).json({ error: "Token inválido ou expirado. Faça login novamente." });
+        }
     } catch (error) {
         console.error("❌ [USER] Erro ao buscar informações do usuário:", error.message);
         res.status(500).json({ error: "Erro ao buscar informações do usuário.", details: error.message });
