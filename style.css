@@ -4,6 +4,11 @@
     font-weight: bold;
 }
 
+.logo {
+    width: 128px;
+    height: 128px;
+}
+
 body * {
     font-family: "Poppins", sans-serif;
 }
