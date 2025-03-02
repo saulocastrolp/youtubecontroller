@@ -41,7 +41,7 @@ module.exports = async (req, res) => {
         "openid",  // Para obter a identidade do usuário
         "https://www.googleapis.com/auth/youtube.readonly",
         "https://www.googleapis.com/auth/youtube.force-ssl",
-        "https://www.googleapis.com/auth/youtube",
+        "https://www.googleapis.com/auth/youtube"
     ];
 
     const url = oauth2Client.generateAuthUrl({
