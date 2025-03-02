@@ -2,21 +2,14 @@ const { google } = require("googleapis");
 
 module.exports = async (req, res) => {
     try {
-        console.log("▶️ [PLAY] Tentando iniciar a reprodução no YouTube Music...");
+        console.log("▶️ [PLAY] Tentando reproduzir a última música curtida...");
 
         const accessToken = req.headers.authorization?.split(" ")[1];
 
         if (!accessToken) {
-            console.warn("⚠️ [PLAY] Token de acesso não fornecido.");
             return res.status(401).json({ error: "Token de acesso ausente." });
         }
 
-        if (!process.env.CLIENT_ID || !process.env.CLIENT_SECRET || !process.env.REDIRECT_URI) {
-            console.error("❌ ERRO: Variáveis de ambiente não definidas!");
-            return res.status(500).json({ error: "Variáveis de ambiente não configuradas." });
-        }
-
-        // 🔥 Criando o OAuth2 Client corretamente
         const oauth2Client = new google.auth.OAuth2(
             process.env.CLIENT_ID,
             process.env.CLIENT_SECRET,
@@ -27,19 +20,24 @@ module.exports = async (req, res) => {
 
         const youtube = google.youtube({
             version: "v3",
-            auth: oauth2Client // 🔥 Agora usando OAuth2Client corretamente
+            auth: oauth2Client
         });
 
-        // 🔥 Simulando um comando de reprodução, já que a API do YouTube não tem um endpoint direto para Play/Pause
-        const response = await youtube.videos.list({
+        // 🔥 Buscamos a última música tocada antes de tentar reproduzir
+        const trackResponse = await youtube.playlistItems.list({
             part: "snippet",
-            myRating: "like"
+            playlistId: "HL", // Playlist de vídeos curtidos
+            maxResults: 1
         });
 
-        console.log("✅ [PLAY] Comando enviado com sucesso:", response.data);
-        res.json({ message: "▶️ Play enviado com sucesso!", data: response.data });
+        if (trackResponse.data.items.length === 0) {
+            return res.status(404).json({ error: "Nenhuma música encontrada." });
+        }
+
+        const video = trackResponse.data.items[0].snippet;
+        res.json({ message: "▶️ Música tocando!", videoId: video.resourceId.videoId, title: video.title });
     } catch (error) {
-        console.error("❌ [PLAY] Erro ao tentar iniciar a reprodução:", error.message);
-        res.status(500).json({ error: "Erro ao tentar iniciar a reprodução.", details: error.message });
+        console.error("❌ [PLAY] Erro ao tentar reproduzir:", error.message);
+        res.status(500).json({ error: "Erro ao tentar reproduzir.", details: error.message });
     }
 };

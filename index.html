@@ -128,20 +128,77 @@
             }
         }
 
+        async function getCurrentTrack() {
+            const accessToken = localStorage.getItem("access_token");
 
+            if (!accessToken) {
+                console.warn("⚠️ Usuário não autenticado. Redirecionando para login...");
+                authenticate();
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/getCurrentTrack`, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const data = await response.json();
+                currentVideoId = data.videoId; // 🔥 Armazena o ID globalmente para pause e repeat
+                console.log("🎵 Música atual:", data.title, "ID:", data.videoId);
+            } catch (error) {
+                console.error("❌ Erro ao buscar a música atual:", error);
+            }
+        }
 
         async function sync() {
-            console.log("🔄 Sincronizar não implementado ainda.");
+            const accessToken = localStorage.getItem("access_token");
+
+            if (!accessToken) {
+                console.warn("⚠️ Usuário não autenticado. Redirecionando para login...");
+                authenticate();
+                return;
+            }
+
+            try {
+                console.log("🔄 Sincronizando reprodução...");
+                const response = await fetch(`${API_URL}/sync?device=${navigator.userAgent.includes("Mobile") ? "celular" : "computador"}`, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const data = await response.json();
+                console.log("✅ Sincronização:", data.message, "Dispositivo:", data.device);
+            } catch (error) {
+                console.error("❌ Erro ao sincronizar reprodução:", error);
+            }
         }
 
         async function transferPlayback() {
-            console.log("📲 Transferência de reprodução não implementada ainda.");
+            const accessToken = localStorage.getItem("access_token");
+
+            if (!accessToken) {
+                console.warn("⚠️ Usuário não autenticado. Redirecionando para login...");
+                authenticate();
+                return;
+            }
+
+            try {
+                console.log("📲 Transferindo reprodução...");
+                const response = await fetch(`${API_URL}/transfer`, {
+                    headers: { Authorization: `Bearer ${accessToken}` }
+                });
+
+                const data = await response.json();
+                console.log("✅ Transferência realizada:", data.message, "Novo dispositivo:", data.device);
+            } catch (error) {
+                console.error("❌ Erro ao transferir reprodução:", error);
+            }
         }
 
         window.onload = function () {
             handleAuthCallback();
             getUserInfo();
             getStatus();
+            getCurrentTrack();
         };
 
         setInterval(() => {
@@ -188,16 +245,16 @@
         <hr/>
         <div class="btn-group">
             <button class="btn btn-dark" onclick="sendCommand('play')">▶️ Play</button>
-            <button class="btn btn-dark" onclick="sendCommand('pause')">⏸️ Pause</button>
-            <button class="btn btn-dark" onclick="sendCommand('previous')">⏮️ Anterior</button>
-            <button class="btn btn-dark" onclick="sendCommand('next')">⏭️ Próxima</button>
+            <button class="btn btn-dark" onclick="sendCommand('pause?videoId=' + currentVideoId)">⏸️ Pause</button>
+            <button class="btn btn-dark" onclick="sendCommand('previous?videoId=' + currentVideoId)">⏮️ Anterior</button>
+            <button class="btn btn-dark" onclick="sendCommand('next?videoId=' + currentVideoId)">⏭️ Próxima</button>
         </div>
         <hr/>
         <div class="btn-group">
-            <button class="btn btn-dark" onclick="sendCommand('like')">❤️ Curtir</button>
-            <button class="btn btn-dark" onclick="sendCommand('dislike')">👎 Não Curtir</button>
+            <button class="btn btn-dark" onclick="sendCommand('like?videoId=' + currentVideoId)">❤️ Curtir</button>
+            <button class="btn btn-dark" onclick="sendCommand('dislike?videoId=' + currentVideoId)">👎 Não Curtir</button>
             <button class="btn btn-dark" onclick="sendCommand('shuffle')">🔀 Aleatório</button>
-            <button class="btn btn-dark" onclick="sendCommand('repeat')">🔁 Repetir</button>
+            <button class="btn btn-dark" onclick="sendCommand('repeat?videoId=' + currentVideoId)">🔁 Repetir</button>
         </div>
     </div>
     
