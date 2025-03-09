@@ -9,6 +9,11 @@
     height: 128px;
 }
 
+body {
+    overflow-y: auto;
+    height: 100%;
+}
+
 body * {
     font-family: "Poppins", sans-serif;
 }
@@ -21,7 +26,9 @@ body hr {
 }
 
 body .container {
-    height: 100vh;
+    
+    margin-top: 5rem;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;

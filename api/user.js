@@ -1,3 +1,4 @@
+const axios = require("axios");
 const { google } = require("googleapis");
 
 module.exports = async (req, res) => {
@@ -20,9 +21,9 @@ module.exports = async (req, res) => {
         console.log(`✅ [USER] Token recebido: ${accessToken.substring(0, 6)}... (mascarado para segurança)`);
 
         // 🔥 Testa se o token é válido antes de usá-lo
-        const tokenInfo = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${accessToken}`)
-            .then(response => response.json());
-
+        const tokenInfoResponse = await axios.get(`https://oauth2.googleapis.com/tokeninfo?access_token=${accessToken}`);
+        const tokenInfo = tokenInfoResponse.data;
+        
         if (tokenInfo.error || tokenInfo.expires_in <= 0) {
             console.error("❌ [USER] Token inválido ou expirado:", tokenInfo);
             return res.status(401).json({ error: "Token inválido ou expirado. Faça login novamente." });

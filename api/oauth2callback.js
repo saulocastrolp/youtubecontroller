@@ -1,3 +1,4 @@
+const axios = require("axios");
 const { google } = require("googleapis");
 
 module.exports = async (req, res) => {
@@ -24,8 +25,8 @@ module.exports = async (req, res) => {
         console.log("✅ [OAUTH CALLBACK] Tokens obtidos:", tokens);
 
         // 🔍 Verifica se os escopos concedidos incluem os necessários
-        const tokenInfo = await fetch(`https://oauth2.googleapis.com/tokeninfo?access_token=${tokens.access_token}`)
-            .then(response => response.json());
+        const tokenInfoResponse = await axios.get(`https://oauth2.googleapis.com/tokeninfo?access_token=${tokens.access_token}`);
+        const tokenInfo = tokenInfoResponse.data;
 
         if (!tokenInfo.scope.includes("https://www.googleapis.com/auth/youtube.readonly") ||
             !tokenInfo.scope.includes("https://www.googleapis.com/auth/youtube.force-ssl") ||

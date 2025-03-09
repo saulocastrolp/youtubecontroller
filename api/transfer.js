@@ -1,3 +1,4 @@
+const axios = require("axios");
 const { google } = require("googleapis");
 
 let activeDevice = "computador"; // Assume que começa no computador

@@ -1,3 +1,4 @@
+const axios = require("axios");
 const { google } = require("googleapis");
 
 module.exports = async (req, res) => {
@@ -23,23 +24,23 @@ module.exports = async (req, res) => {
             auth: oauth2Client
         });
 
-        // 🔥 Obtém o histórico de vídeos assistidos (tentando pegar o YouTube Music)
-        const response = await youtube.playlistItems.list({
+        // 🔥 Obtém a playlist de histórico do usuário (últimos vídeos assistidos)
+        const historyResponse = await youtube.playlistItems.list({
             part: "snippet",
-            playlistId: "HL", // Playlist de histórico do usuário
+            playlistId: "HL", // "History List" → Playlist que contém os últimos vídeos/músicas assistidos
             maxResults: 1
         });
 
-        if (response.data.items.length === 0) {
-            return res.json({ title: "Nenhuma música tocando", channel: "" });
+        if (!historyResponse.data.items || historyResponse.data.items.length === 0) {
+            return res.json({ title: "Nenhuma música ou vídeo tocando", channel: "", videoId: null });
         }
 
-        const video = response.data.items[0].snippet;
-        const videoId = video.resourceId.videoId;
+        const video = historyResponse.data.items[0].snippet;
+        const videoId = historyResponse.data.items[0].snippet.resourceId.videoId;
         const title = video.title;
         const channel = video.channelTitle;
 
-        console.log(`✅ [STATUS] Música atual: ${title} - ${channel}`);
+        console.log(`✅ [STATUS] Última reprodução: ${title} - ${channel}`);
 
         res.json({ title, channel, videoId });
     } catch (error) {

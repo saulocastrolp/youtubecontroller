@@ -127,31 +127,6 @@
             }
         }
 
-        async function getCurrentTrack() {
-            const accessToken = localStorage.getItem("access_token");
-
-            if (!accessToken) {
-                console.warn("⚠️ Usuário não autenticado. Redirecionando para login...");
-                authenticate();
-                return;
-            }
-
-            try {
-                console.log("🎵 Obtendo música atual...");
-                const response = await fetch(`${API_URL}/getCurrentTrack`, {
-                    headers: { Authorization: `Bearer ${accessToken}` }
-                });
-
-                const data = await response.json();
-                currentVideoId = data.videoId; // 🔥 Armazena o ID para controle
-                document.getElementById("music-title").innerText = data.title; // 🔥 Atualiza o título na interface
-
-                console.log("🎵 Música atual:", data.title, "ID:", data.videoId);
-            } catch (error) {
-                console.error("❌ Erro ao buscar a música atual:", error);
-            }
-        }
-
 
         async function sync() {
             const accessToken = localStorage.getItem("access_token");
@@ -201,12 +176,10 @@
             handleAuthCallback();
             getUserInfo();
             getStatus();
-            getCurrentTrack();
         };
 
         setInterval(() => {
             getStatus();
-            getCurrentTrack();
         }, 5000);
     </script>
     <style>

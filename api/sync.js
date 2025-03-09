@@ -1,3 +1,4 @@
+const axios = require("axios");
 const { google } = require("googleapis");
 
 let activeDevice = null; // Guarda o dispositivo que está tocando
